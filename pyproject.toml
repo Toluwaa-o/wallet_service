@@ -1,0 +1,26 @@
+[build-system]
+requires = ["setuptools", "setuptools-scm"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "wallet_service"
+authors = [
+    {name = "Toluwalashe", email = "asheogunleye02@gmail.com"}
+]
+description = "Wallet service with Paystack integration, JWT authentication, and API key management."
+version = "0.0.1"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi",
+    "sqlalchemy",
+    "httpx",
+    "uvicorn",
+    "dotenv",
+    "asyncpg>=0.30.0",
+    "psycopg[binary]>=3.2.12",
+    "psycopg2-binary>=2.9.11",
+    'PyJWT',
+    'google-auth',
+    'requests'
+]

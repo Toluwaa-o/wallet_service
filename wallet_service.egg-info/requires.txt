@@ -1,0 +1,11 @@
+fastapi
+sqlalchemy
+httpx
+uvicorn
+dotenv
+asyncpg>=0.30.0
+psycopg[binary]>=3.2.12
+psycopg2-binary>=2.9.11
+PyJWT
+google-auth
+requests
