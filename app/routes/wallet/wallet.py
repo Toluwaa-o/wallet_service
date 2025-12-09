@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, Depends, Header
+from fastapi import APIRouter, HTTPException, Depends, Header, Request
 from app.schemas.schemas import User, Wallet, Transaction
 from app.models.models import WalletBalance, DepositRequest, DepositResponse, PermissionEnum, TransactionResponse, TransferRequest, TransferResponse
 from app.utils.utils import get_current_user, get_db, check_permission
@@ -105,7 +105,7 @@ async def deposit_wallet(
 
 @router.post("/paystack/webhook")
 async def paystack_webhook(
-    data: dict,
+    request: Request,
     x_paystack_signature: Optional[str] = Header(None),
     db: Session = Depends(get_db)
 ):
@@ -113,10 +113,11 @@ async def paystack_webhook(
     if not x_paystack_signature:
         raise HTTPException(status_code=401, detail="Missing signature")
 
-    payload = json.dumps(data)
+    body = await request.body()
+    
     hash_obj = hmac.new(
         PAYSTACK_SECRET.encode(),
-        payload.encode(),
+        body,
         hashlib.sha512
     )
     expected_sig = hash_obj.hexdigest()
@@ -124,7 +125,7 @@ async def paystack_webhook(
     if x_paystack_signature != expected_sig:
         raise HTTPException(status_code=401, detail="Invalid signature")
 
-    reference = data.get("reference")
+    reference = request.get("reference")
     transaction = db.query(Transaction).filter(
         Transaction.reference == reference).first()
 
@@ -134,7 +135,7 @@ async def paystack_webhook(
     if transaction.status == "success":
         return {"status": True}
 
-    if data.get("status"):
+    if request.get("status"):
         transaction.status = "success"
         wallet = db.query(Wallet).filter(
             Wallet.id == transaction.wallet_id).first()
