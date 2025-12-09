@@ -8,6 +8,13 @@ from app.routes.health.health import router as health_router
 
 app = FastAPI(title="Wallet Service")
 
+@app.get('/')
+def hello():
+    return JSONResponse(
+        content={
+            "details": 'visit /docs for project documentation'
+        }
+    )
 
 @app.exception_handler(HTTPException)
 async def http_exception_handler(request, exc):
