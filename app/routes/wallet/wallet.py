@@ -61,10 +61,10 @@ async def deposit_wallet(
                 headers={"Authorization": f"Bearer {PAYSTACK_SECRET}"},
                 timeout=10.0
             )
-        
+
         response.raise_for_status()
         data = response.json()
-        
+
         if not data.get("status"):
             transaction.status = "failed"
             db.commit()
@@ -77,7 +77,7 @@ async def deposit_wallet(
             reference=reference,
             authorization_url=data["data"]["authorization_url"]
         )
-    
+
     except httpx.RequestError as e:
         transaction.status = "failed"
         db.commit()
@@ -85,7 +85,7 @@ async def deposit_wallet(
             status_code=503,
             detail=f"Payment service unavailable: {str(e)}"
         )
-    
+
     except httpx.HTTPStatusError as e:
         transaction.status = "failed"
         db.commit()
@@ -93,7 +93,7 @@ async def deposit_wallet(
             status_code=e.response.status_code,
             detail=f"Payment service error: {e.response.text}"
         )
-    
+
     except Exception as e:
         transaction.status = "failed"
         db.commit()

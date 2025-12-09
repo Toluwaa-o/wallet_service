@@ -1,5 +1,7 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import JSONResponse
+import uvicorn
+import os
 
 from app.app_routers.v1 import api_router
 from app.routes.health.health import router as health_router
@@ -19,5 +21,5 @@ app.include_router(health_router)
 app.include_router(api_router)
 
 if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    port = int(os.getenv("PORT", 8000))
+    uvicorn.run(app, host="0.0.0.0", port=port)
