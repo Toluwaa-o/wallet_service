@@ -114,7 +114,7 @@ async def paystack_webhook(
         raise HTTPException(status_code=401, detail="Missing signature")
 
     body = await request.body()
-    
+
     hash_obj = hmac.new(
         PAYSTACK_SECRET.encode(),
         body,
@@ -126,9 +126,9 @@ async def paystack_webhook(
         raise HTTPException(status_code=401, detail="Invalid signature")
 
     data = await request.json()
-    
+
     reference = data["data"]["reference"]
-    
+
     print(data)
     transaction = db.query(Transaction).filter(
         Transaction.reference == reference).first()
@@ -141,13 +141,13 @@ async def paystack_webhook(
         return {"status": True}
 
     print('passed checks')
-    if data.get("status"):
+    if data["data"]['status'] == 'success':
         transaction.status = "success"
         wallet = db.query(Wallet).filter(
             Wallet.id == transaction.wallet_id).first()
         wallet.balance += transaction.amount
     else:
-        transaction.status = "failed"
+        transaction.status = data["data"]['status']
 
     db.commit()
     return {"status": True}
@@ -170,7 +170,8 @@ async def deposit_status(
 
     wallet = db.query(Wallet).filter(Wallet.user_id == user_id).first()
     if transaction.wallet_id != wallet.id:
-        raise HTTPException(status_code=403, detail="Unauthorized access to transaction")
+        raise HTTPException(
+            status_code=403, detail="Unauthorized access to transaction")
 
     return {
         "reference": reference,
