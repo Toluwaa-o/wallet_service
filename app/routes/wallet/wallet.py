@@ -127,9 +127,9 @@ async def paystack_webhook(
 
     data = await request.json()
     
-    reference = data.get("reference")
+    reference = data["data"]["reference"]
     
-    print(reference)
+    print(data)
     transaction = db.query(Transaction).filter(
         Transaction.reference == reference).first()
 
