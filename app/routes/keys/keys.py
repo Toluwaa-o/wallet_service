@@ -51,7 +51,7 @@ async def create_api_key(
     return ApiKeyResponse(api_id=api_key.id, api_key=raw_key, expires_at=expires_at)
 
 
-@router.post("/keys/rollover", response_model=ApiKeyResponse)
+@router.post("/rollover", response_model=ApiKeyResponse)
 async def rollover_api_key(
     req: RolloverApiKeyRequest,
     current_user: tuple = Depends(get_current_user),
