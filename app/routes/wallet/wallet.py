@@ -125,8 +125,11 @@ async def paystack_webhook(
     if x_paystack_signature != expected_sig:
         raise HTTPException(status_code=401, detail="Invalid signature")
 
-    reference = request.get("reference")
-    print("reference")
+    data = await request.json()
+    
+    reference = data.get("reference")
+    
+    print(reference)
     transaction = db.query(Transaction).filter(
         Transaction.reference == reference).first()
 
@@ -138,7 +141,7 @@ async def paystack_webhook(
         return {"status": True}
 
     print('passed checks')
-    if request.get("status"):
+    if data.get("status"):
         transaction.status = "success"
         wallet = db.query(Wallet).filter(
             Wallet.id == transaction.wallet_id).first()
