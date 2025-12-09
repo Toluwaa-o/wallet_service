@@ -51,7 +51,7 @@ async def create_api_key(
     return ApiKeyResponse(api_id=api_key.id, api_key=raw_key, expires_at=expires_at)
 
 
-@router.post("/rollover", response_model=ApiKeyResponse)
+@router.post("/keys/rollover", response_model=ApiKeyResponse)
 async def rollover_api_key(
     req: RolloverApiKeyRequest,
     current_user: tuple = Depends(get_current_user),
@@ -67,6 +67,9 @@ async def rollover_api_key(
 
     if not expired_key:
         raise HTTPException(status_code=404, detail="API key not found")
+
+    if expired_key.revoked:
+        raise HTTPException(status_code=400, detail="Cannot rollover a revoked API key")
 
     if expired_key.expires_at > datetime.utcnow():
         raise HTTPException(status_code=400, detail="API key must be expired")
@@ -84,9 +87,12 @@ async def rollover_api_key(
         expires_at=expires_at
     )
     db.add(new_key)
+    
+    expired_key.revoked = True
+    
     db.commit()
 
-    return ApiKeyResponse(api_id=new_key.id, api_key=raw_key, expires_at=expires_at)
+    return ApiKeyResponse(api_key=raw_key, expires_at=expires_at)
 
 
 @router.post("/{key_id}/revoke")
