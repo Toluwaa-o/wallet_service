@@ -129,18 +129,15 @@ async def paystack_webhook(
 
     reference = data["data"]["reference"]
 
-    print(data)
     transaction = db.query(Transaction).filter(
         Transaction.reference == reference).first()
 
     if not transaction:
         return {"status": True}
 
-    print('passed first check')
     if transaction.status == "success":
         return {"status": True}
 
-    print('passed checks')
     if data["data"]['status'] == 'success':
         transaction.status = "success"
         wallet = db.query(Wallet).filter(
