@@ -126,15 +126,18 @@ async def paystack_webhook(
         raise HTTPException(status_code=401, detail="Invalid signature")
 
     reference = request.get("reference")
+    print("reference")
     transaction = db.query(Transaction).filter(
         Transaction.reference == reference).first()
 
     if not transaction:
         return {"status": True}
 
+    print('passed first check')
     if transaction.status == "success":
         return {"status": True}
 
+    print('passed checks')
     if request.get("status"):
         transaction.status = "success"
         wallet = db.query(Wallet).filter(
@@ -154,12 +157,17 @@ async def deposit_status(
     db: Session = Depends(get_db)
 ):
     """Get deposit status (does not credit wallet)"""
-    user_id, _ = current_user
+    user_id, permissions = current_user
+    check_permission(permissions, PermissionEnum.READ)
 
     transaction = db.query(Transaction).filter(
         Transaction.reference == reference).first()
     if not transaction:
         raise HTTPException(status_code=404, detail="Transaction not found")
+
+    wallet = db.query(Wallet).filter(Wallet.user_id == user_id).first()
+    if transaction.wallet_id != wallet.id:
+        raise HTTPException(status_code=403, detail="Unauthorized access to transaction")
 
     return {
         "reference": reference,
