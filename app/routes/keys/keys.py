@@ -86,7 +86,7 @@ async def rollover_api_key(
     db.add(new_key)
     db.commit()
 
-    return ApiKeyResponse(api_key=raw_key, expires_at=expires_at)
+    return ApiKeyResponse(api_id=new_key.id, api_key=raw_key, expires_at=expires_at)
 
 
 @router.post("/{key_id}/revoke")
