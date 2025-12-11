@@ -19,6 +19,7 @@ GOOGLE_CLIENT_SECRET = os.getenv("GOOGLE_CLIENT_SECRET")
 JWT_SECRET = os.getenv("JWT_SECRET")
 JWT_ALGORITHM = os.getenv("JWT_ALGORITHM")
 JWT_EXPIRY_HOURS = os.getenv("JWT_EXPIRY_HOURS")
+REDIRECT_URL = os.getenv('REDIRECT_URL')
 
 router = APIRouter(prefix="/auth/google", tags=["Authentication"])
 
@@ -26,7 +27,7 @@ router = APIRouter(prefix="/auth/google", tags=["Authentication"])
 @router.get("/")
 async def google_login():
     """Redirect to Google sign-in"""
-    google_auth_url = f"https://accounts.google.com/o/oauth2/v2/auth?client_id={GOOGLE_CLIENT_ID}&response_type=code&scope=openid%20email%20profile&redirect_uri=http://localhost:8000/auth/google/callback"
+    google_auth_url = f"https://accounts.google.com/o/oauth2/v2/auth?client_id={GOOGLE_CLIENT_ID}&response_type=code&scope=openid%20email%20profile&redirect_uri={REDIRECT_URL}/auth/google/callback"
     return RedirectResponse(url=google_auth_url)
 
 
@@ -41,7 +42,7 @@ async def google_callback(code: str, db: Session = Depends(get_db)):
                     "code": code,
                     "client_id": GOOGLE_CLIENT_ID,
                     "client_secret": GOOGLE_CLIENT_SECRET,
-                    "redirect_uri": "http://localhost:8000/auth/google/callback",
+                    "redirect_uri": f"{REDIRECT_URL}/auth/google/callback",
                     "grant_type": "authorization_code"
                 }
             )
